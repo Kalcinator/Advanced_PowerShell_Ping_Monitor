@@ -2,8 +2,6 @@
 
 An aesthetic, persistent, and robust network latency monitor designed for continuous, daily use in a modern PowerShell terminal.
 
-![Script in action](URL_DE_VOTRE_IMAGE)
-
 ## About The Project
 
 This script is a monitoring tool that is both functional and decorative. It's designed to run continuously, providing situational awareness of network stability with immediate visual and audible feedback. It sends ICMP Ping requests to a specified target at a precise interval and displays the results with clear, color-coded formatting and periodic statistics.
