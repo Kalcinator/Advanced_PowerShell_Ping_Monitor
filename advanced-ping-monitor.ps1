@@ -51,7 +51,7 @@
     Version:      5.0
     Authors:      Gemini & Charles
     Date:         2025-08-17
-    License:      CC BY-NC-SA 4.0
+    License:      MIT
 
     Requires: PowerShell 7+ for optimal color and syntax compatibility.
 
@@ -319,3 +319,4 @@ finally {
         $ping.Dispose() 
     }
 }
+
