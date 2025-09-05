@@ -1,74 +1,86 @@
 # Advanced PowerShell Ping Monitor
+# 📡 Advanced Ping & Connection Monitor
 
-An aesthetic, persistent, and robust network latency monitor designed for continuous, daily use in a modern PowerShell terminal.
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![PowerShell-Version](https://img.shields.io/badge/PowerShell-7.0%2B-blue.svg)](https://github.com/PowerShell/PowerShell)
 
-## About The Project
-
-This script is a monitoring tool that is both functional and decorative. It's designed to run continuously, providing situational awareness of network stability with immediate visual and audible feedback. It sends ICMP Ping requests to a specified target at a precise interval and displays the results with clear, color-coded formatting and periodic statistics.
-
-## Features
-
--   **Real-time Monitoring**: Pings a target at a steady, user-defined interval.
--   **High-Precision Timer**: Uses a `.NET Stopwatch` for accurate timing, ensuring the script sends a ping exactly every `N` milliseconds.
--   **Color-Coded Output**: Successful pings cycle through a rainbow palette for easy visual tracking. Critical latency and packet loss have distinct, high-visibility colors.
--   **Audible Alerts**: Provides optional, distinct beeps for high latency and packet loss.
--   **Periodic Statistics**: Displays session totals, packet loss count, loss rate, and a moving average latency every 10 pings.
--   **Smart Startup Routine**: Patiently waits for a stable network connection before starting, making it reliable for auto-launch on system startup.
--   **Robust Error Handling**: Gracefully handles network errors and different types of ping failures.
-
-## Requirements
-
--   **PowerShell 7+**: Required for optimal color rendering and modern syntax compatibility.
-
-## Usage
-
-Save the script as `advanced-ping-monitor.ps1`. Run it from your PowerShell terminal.
-
-#### **Default**
-
-Launches the script with default parameters (pings 1.1.1.1 every second).
-
-```powershell
-.\advanced-ping-monitor.ps1
-```
-
-#### **Custom Parameters**
-
-Monitors Google's DNS (`8.8.8.8`), considers latency critical above 75ms, and disables all sounds.
-
-```powershell
-.\advanced-ping-monitor.ps1 -Target "8.8.8.8" -CriticalMs 75 -Mute
-```
-
-### Script Parameters
-
-| Parameter     | Description                                                                  | Default   |
-| ------------- | ---------------------------------------------------------------------------- | --------- |
-| `Target`      | The IP address or hostname of the target to monitor.                         | `1.1.1.1` |
-| `IntervalMs`  | The target interval between each ping, in milliseconds.                      | `1000`    |
-| `CriticalMs`  | The latency threshold (ms) that triggers a critical alert.                   | `150`     |
-| `HistorySize` | The number of recent successful pings to use for the moving average.         | `30`      |
-| `Mute`        | A switch parameter to disable all audible alerts.                            | `false`   |
+An intelligent, aesthetic, and robust network latency monitor with automatic failover, designed for continuous, everyday use. This tool provides constant situational awareness of your network's stability with smart visual and harmonic audio feedback.
 
 ---
 
-## Auto-start on Windows
+### ✨ Key Features
 
-For an automated launch on Windows startup, creating a shortcut in the `shell:startup` folder is recommended.
+*   **🎯 Smart Failover:** Monitors a primary target (e.g., a game server). If it becomes unreachable, the script transparently switches to a stable fallback target (e.g., `8.8.8.8`) to monitor general internet connectivity.
+*   **🔄 Automatic Recovery:** While on the fallback target, it periodically checks the primary target in the background. It automatically switches back as soon as the primary target is confirmed to be stable again.
+*   **🔇 "Quiet Mode" for Outages:** After 10 consecutive packet losses, the script stops the repetitive error sounds and displays a clean, single-line status updating the current number of losses, preventing alert fatigue during a real outage.
+*   **🔔 Harmonic Audio Alerts:** Uses a pleasant, harmonic musical scale for notifications:
+    *   `E5` (659 Hz) for critical latency warnings.
+    *   `D6` (1175 Hz) for packet loss errors.
+    *   A C-Major arpeggio (`C6-E6-G6`) for a clear "Connection Restored!" notification.
+*   **📊 Persistent Statistics:** Displays comprehensive session statistics (Total, Lost, Average, Loss Rate) every 10 successful prings, ensuring an accurate long-term view of your connection's quality.
+*   **🎨 Aesthetic Interface:** Uses a customizable rainbow color cycle for successful pings to provide a visually pleasing and informative display.
 
-1.  Press `Win + R` to open the Run dialog.
-2.  Type `shell:startup` and press Enter. This will open the Startup folder.
-3.  Right-click inside the folder, select `New` > `Shortcut`.
-4.  In the "Type the location of the item" field, paste the following line (adjust the paths to match your system):
+---
 
+### 🚀 Getting Started
+
+#### Prerequisites
+*   Windows 10 or 11
+*   **PowerShell 7.0+** (Required for optimal color and syntax compatibility)
+
+#### Installation
+1.  Download the `ping-monitor.ps1` script to a convenient location on your computer (e.g., `C:\Scripts\`).
+2.  Open a PowerShell 7 terminal.
+3.  Navigate to the directory where you saved the script:
+    ```powershell
+    cd C:\Scripts\
+    ```
+
+---
+
+### ⚙️ Usage
+
+#### Basic Execution
+To run the script with its default settings (monitoring a FFXIV server, fallback to Google DNS), simply execute it:
+
+```powershell
+.\ping-monitor.ps1
 ```
-"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Your\Path\To\advanced-ping-monitor.ps1"
-```
 
-5.  Click `Next`, give your shortcut a name (e.g., "Ping Monitor"), and click `Finish`.
+#### Custom Examples
 
-The script will now launch automatically every time you log in to Windows.
+*   **Monitor a different target and use a different fallback:**
+    ```powershell
+    .\ping-monitor.ps1 -PrimaryTarget "www.google.com" -FallbackTarget "1.1.1.1"
+    ```
 
-## License
+*   **Set a more aggressive latency threshold and mute all sounds:**
+    ```powershell
+    .\ping-monitor.ps1 -CriticalMs 75 -Mute
+    ```
 
-This project is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). See the `LICENSE` file for more details.
+*   **Ping twice per second and increase the history size for the average calculation:**
+    ```powershell
+    .\ping-monitor.ps1 -IntervalMs 500 -HistorySize 60
+    ```
+
+---
+
+### 🔧 Automatic Startup on Windows
+
+To have the monitor launch automatically when you log into Windows, create a shortcut:
+
+1.  Press `Win + R`, type `shell:startup`, and hit Enter. This will open your user's Startup folder.
+2.  Right-click inside the folder and select `New` > `Shortcut`.
+3.  In the "Type the location of the item" field, paste the following command. **Make sure to adjust the path to your script file!**
+
+    ```
+    "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Scripts\ping-monitor.ps1"
+    ```
+4.  Click `Next`, give the shortcut a name (e.g., "Ping Monitor"), and click `Finish`.
+
+---
+
+### 📜 License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). See the `LICENSE` file for details.
