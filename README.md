@@ -16,7 +16,7 @@ An intelligent, aesthetic, and robust network latency monitor with automatic fai
     *   `E5` (659 Hz) for critical latency warnings.
     *   `D6` (1175 Hz) for packet loss errors.
     *   A C-Major arpeggio (`C6-E6-G6`) for a clear "Connection Restored!" notification.
-*   **📊 Persistent Statistics:** Displays comprehensive session statistics (Total, Lost, Average, Loss Rate) every 10 successful prings, ensuring an accurate long-term view of your connection's quality.
+*   **📊 Persistent Statistics:** Displays comprehensive session statistics (Total, Lost, Average, Loss Rate) every 10 successful pings, ensuring an accurate long-term view of your connection's quality.
 *   **🎨 Aesthetic Interface:** Uses a customizable rainbow color cycle for successful pings to provide a visually pleasing and informative display.
 
 ---
@@ -28,7 +28,7 @@ An intelligent, aesthetic, and robust network latency monitor with automatic fai
 *   **PowerShell 7.0+** (Required for optimal color and syntax compatibility)
 
 #### Installation
-1.  Download the `ping-monitor.ps1` script to a convenient location on your computer (e.g., `C:\Scripts\`).
+1.  Download the `advanced-ping-monitor.ps1` script to a convenient location on your computer (e.g., `C:\Scripts\`).
 2.  Open a PowerShell 7 terminal.
 3.  Navigate to the directory where you saved the script:
     ```powershell
@@ -43,24 +43,24 @@ An intelligent, aesthetic, and robust network latency monitor with automatic fai
 To run the script with its default settings (monitoring a FFXIV server, fallback to Google DNS), simply execute it:
 
 ```powershell
-.\ping-monitor.ps1
+.\advanced-ping-monitor.ps1
 ```
 
 #### Custom Examples
 
 *   **Monitor a different target and use a different fallback:**
     ```powershell
-    .\ping-monitor.ps1 -PrimaryTarget "www.google.com" -FallbackTarget "1.1.1.1"
+    .\advanced-ping-monitor.ps1 -PrimaryTarget "www.google.com" -FallbackTarget "1.1.1.1"
     ```
 
 *   **Set a more aggressive latency threshold and mute all sounds:**
     ```powershell
-    .\ping-monitor.ps1 -CriticalMs 75 -Mute
+    .\advanced-ping-monitor.ps1 -CriticalMs 75 -Mute
     ```
 
 *   **Ping twice per second and increase the history size for the average calculation:**
     ```powershell
-    .\ping-monitor.ps1 -IntervalMs 500 -HistorySize 60
+    .\advanced-ping-monitor.ps1 -IntervalMs 500 -HistorySize 60
     ```
 
 ---
@@ -74,7 +74,7 @@ To have the monitor launch automatically when you log into Windows, create a sho
 3.  In the "Type the location of the item" field, paste the following command. **Make sure to adjust the path to your script file!**
 
     ```
-    "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Scripts\ping-monitor.ps1"
+    "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Scripts\advanced-ping-monitor.ps1"
     ```
 4.  Click `Next`, give the shortcut a name (e.g., "Ping Monitor"), and click `Finish`.
 
