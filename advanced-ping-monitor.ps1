@@ -41,13 +41,13 @@
     If specified, disables all audio alerts.
 
 .EXAMPLE
-    PS C:\> .\ping-monitor.ps1
+    PS C:\> .\advanced-ping-monitor.ps1
 
     Launches the script with default settings. It monitors the FFXIV server (80.239.145.6)
     and uses Google DNS (8.8.8.8) as its fallback target.
 
 .EXAMPLE
-    PS C:\> .\ping-monitor.ps1 -PrimaryTarget "www.google.com" -FallbackTarget "1.1.1.1"
+    PS C:\> .\advanced-ping-monitor.ps1 -PrimaryTarget "www.google.com" -FallbackTarget "1.1.1.1"
 
     Monitors "www.google.com" as the primary target and uses Cloudflare DNS (1.1.1.1)
     in case of failure.
@@ -68,9 +68,9 @@
     2. In the folder that opens, right-click > New > Shortcut.
     3. In the "Type the location of the item" field, paste the following command:
 
-    "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Path\To\Your\ping-monitor.ps1"
+    "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -ExecutionPolicy Bypass -File "C:\Path\To\Your\advanced-ping-monitor.ps1"
 
-    (Make sure to adjust the path to your ping-monitor.ps1 file if necessary)
+    (Make sure to adjust the path to your advanced-ping-monitor.ps1 file if necessary)
     -----------------------------------------------------------------------------
 
 .LINK
@@ -124,21 +124,26 @@ function Get-NextColor {
 
 # Parses a PingReply or ErrorRecord to create a structured and comprehensive PingFailure object.
 function Get-PingFailure {
+    [CmdletBinding(DefaultParameterSetName = 'FromReply')]
     param(
+        [Parameter(ParameterSetName = 'FromReply')]
         [System.Net.NetworkInformation.PingReply]$Reply,
-        [System.Management.Automation.ErrorRecord]$ErrorRecord
+
+        [Parameter(ParameterSetName = 'FromError', Mandatory = $true)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord,
+
+        [Parameter(ParameterSetName = 'FromStatus', Mandatory = $true)]
+        [System.Net.NetworkInformation.IPStatus]$Status
     )
-    
-    if ($ErrorRecord) {
-        return [PingFailure]::new([PingFailureType]::NetworkError, "Exception", "Network error (Exception)")
-    }
-    
-    if ($Reply) {
-        $status = $Reply.Status.ToString()
-        $type = [PingFailureType]::Unknown # Default type
+
+    $resolveFromStatus = {
+        param([System.Net.NetworkInformation.IPStatus]$statusValue)
+
+        $status = $statusValue.ToString()
+        $type = [PingFailureType]::Unknown
         $message = ""
-        
-        switch ($Reply.Status) {
+
+        switch ($status) {
             'TimedOut' {
                 $type = [PingFailureType]::TimedOut; $message = "Request timed out"
             }
@@ -194,9 +199,24 @@ function Get-PingFailure {
                 $type = [PingFailureType]::Unknown; $message = "Unlisted error: $status"
             }
         }
+
         return [PingFailure]::new($type, $status, $message)
     }
-    
+
+    switch ($PSCmdlet.ParameterSetName) {
+        'FromReply' {
+            if ($null -ne $Reply) {
+                return & $resolveFromStatus $Reply.Status
+            }
+        }
+        'FromStatus' {
+            return & $resolveFromStatus $Status
+        }
+        'FromError' {
+            return [PingFailure]::new([PingFailureType]::NetworkError, "Exception", "Network error (Exception)")
+        }
+    }
+
     return [PingFailure]::new([PingFailureType]::Unknown, "NoReply", "Indeterminate error")
 }
 
@@ -286,6 +306,7 @@ try {
     
     while ($true) {
         $stopwatch.Restart(); $statistics.Total++
+        $reply = $null
         
         if ($state.IsOnFallback) {
             if ($state.PrimaryCheckJob -and $state.PrimaryCheckJob.State -eq 'Completed') {
@@ -314,7 +335,7 @@ try {
                 if ($state.IsQuietMode) { Invoke-ReconnectionAlert -MuteBeep $Mute }
 
                 $state.IsQuietMode = $false; $state.ConsecutiveLosses = 0
-                
+
                 $latency = $reply.RoundtripTime; $history.Enqueue($latency); $historySum += $latency
                 Show-PingSuccess -DisplayTarget $state.CurrentTarget -Latency $latency -TTL ($reply.Options?.Ttl ?? 0)
             } else { throw }
@@ -325,11 +346,12 @@ try {
                 $state.IsOnFallback = $true; $state.CurrentTarget = $state.FallbackTarget; $history.Clear(); $historySum = 0L
             }
             if ($state.ConsecutiveLosses -ge $state.MaxConsecutiveLosses) { $state.IsQuietMode = $true }
-            
+
             if ($state.IsQuietMode) {
                 Update-QuietFailureStatus -ConsecutiveCount $state.ConsecutiveLosses
             } else {
-                Show-PingFailure -DisplayTarget $state.CurrentTarget -Failure (Get-PingFailure -Reply $reply -ErrorRecord $_) -MuteBeep $Mute
+                $failure = if ($null -ne $reply) { Get-PingFailure -Reply $reply } else { Get-PingFailure -ErrorRecord $_ }
+                Show-PingFailure -DisplayTarget $state.CurrentTarget -Failure $failure -MuteBeep $Mute
             }
         }
         
